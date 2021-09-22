@@ -1,0 +1,8 @@
+> python3 correlation.py
+    Correlation coefficient: 0.004564
+> ./parallel_main.exe;
+    Correlation coefficient: 0.004564
+    The parallel time: 32362 ns
+> ./non_parallel_main.exe
+    Correlation coefficient: 0.00454
+    The nonparallel time: 43494 ns
