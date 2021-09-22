@@ -15,5 +15,5 @@ def get_elements(path):
 if __name__ == '__main__':
     filename: str = "sample.txt"
     xarray, yarray = get_elements(path=filename)
-    correlation: float = round(np.corrcoef(xarray, yarray)[0][1], 6)
+    correlation: float = round(np.corrcoef(xarray, yarray)[0][1], 7)
     print(f"Correlation coefficient: {correlation}")
