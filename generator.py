@@ -3,7 +3,7 @@ from random import randint
 
 from numpy import array
 
-size: int = randint(25, 100)
+size: int = randint(75, 100)
 xarray: list = np.random.randint(25, 100, size=size)
 yarray: list = np.random.randint(25, 100, size=size)
 
