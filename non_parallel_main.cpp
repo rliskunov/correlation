@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include "/usr/local/opt/libomp/include/omp.h"
-#include <string>
 #include <sstream>
 #include <cmath>
 
