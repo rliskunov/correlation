@@ -1,0 +1,2 @@
+Correlation coefficient: -0.000136441
+The parallel time: 1088523250 ns
