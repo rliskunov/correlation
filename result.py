@@ -10,8 +10,9 @@ if __name__ == '__main__':
     times: float = round(parallel_time / non_parallel_time, 3)
 
     result: str = f"The execution time of parallel calculations is {times} times less"
-    print(f"The parallel time: {parallel_time} ns")
-    print(f"The nonparallel time: {non_parallel_time} ns")
+    coefficient: int = 1_000_000_000
+    print(f"The parallel time: {round(parallel_time / coefficient, 5)} seconds")
+    print(f"The nonparallel time: {round(non_parallel_time / coefficient, 5)} seconds")
     print(result)
     with open("results.txt", mode="w+") as file:
         file.write(result)

@@ -1,1 +1,1 @@
-The execution time of parallel calculations is 1.02 times less
+The execution time of parallel calculations is 1.002 times less
