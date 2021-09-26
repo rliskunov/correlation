@@ -1,18 +1,16 @@
-def method_name(path: str) -> int:
-    with open(path) as lines:
-        line = lines.read().split("\n")[1]
-    return int(line.split()[-2])
-
-
 if __name__ == '__main__':
-    parallel_time: int = method_name("parallel_correlation.txt")
-    non_parallel_time: int = method_name("non_parallel_correlation.txt")
-    times: float = round(parallel_time / non_parallel_time, 3)
+    with open("result.txt") as lines:
+        line = lines.read().split("\n")
+        parallel_time = int(line[1].split()[-2])
+        non_parallel_time = int(line[3].split()[-2])
 
-    result: str = f"The execution time of parallel calculations is {times} times less"
-    coefficient: int = 1_000_000_000
-    print(f"The parallel time: {round(parallel_time / coefficient, 5)} seconds")
-    print(f"The nonparallel time: {round(non_parallel_time / coefficient, 5)} seconds")
-    print(result)
-    with open("results.txt", mode="w+") as file:
+    result: str = f"The execution time cannot be counted"
+    try:
+        times: float = round(parallel_time / non_parallel_time, 3)
+        result: str = f"The execution time of parallel calculations is {times} times less"
+        print(result)
+    except ZeroDivisionError as err:
+        print(f"Error: {err}")
+
+    with open("result.txt", mode="a") as file:
         file.write(result)
