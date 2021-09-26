@@ -1,16 +1,13 @@
-all: generator parallel non_parallel correlation result clean
+all: generator cpp correlation result clean
 
 generator:
 	python3 generator.py
 
 correlation:
-	python3 correlation.py > correlation.txt
+	python3 correlation.py
 
-parallel:
-	g++ -std=c++11 parallel_main.cpp -o parallel_main.exe; ./parallel_main.exe > parallel_correlation.txt
-
-non_parallel:
-	g++ -std=c++11 non_parallel_main.cpp -o non_parallel_main.exe; ./non_parallel_main.exe > non_parallel_correlation.txt
+cpp:
+	g++ -std=c++11 main.cpp -o main.exe; ./main.exe > result.txt
 
 result:
 	python3 result.py

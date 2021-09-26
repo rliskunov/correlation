@@ -29,13 +29,9 @@ git clone https://github.com/rliskunov/correlation.git
 
     $ make correlation
 
-### Parallel calculate correlation (c++)
+### Calculate correlation (c++)
 
-    $ make parallel
-
-### Non-parallel Calculate correlation (c++)
-
-    $ make non_parallel
+    $ make cpp
 
 ### Usage
 
