@@ -1,2 +1,0 @@
-Correlation coefficient: 3.51884e-05
-The nonparallel time: 2269866040 ns
