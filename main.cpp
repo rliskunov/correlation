@@ -82,41 +82,46 @@ double non_parallel(const int numberArray, const double *arrX, const double *arr
 }
 
 double parallel(const int numberArray, const double *arrX, const double *arrY) {
+    double result = 0;
     double x_amount = 0, y_amount = 0, xy_amount = 0;
     double x_square_amount = 0, y_square_amount = 0;
+#pragma omp parallel
+    {
 #pragma omp for
-    for (int i = 0; i < numberArray; i++) {
-        // sum of elements of array arrX.
+        for (int i = 0; i < numberArray; i++) {
+            // sum of elements of array arrX.
 #pragma omp parallel reduction (+: x_amount)
-        {
-            x_amount += arrX[i];
-        }
+            {
+                x_amount += arrX[i];
+            }
 
-        // sum of elements of array arrY.
+            // sum of elements of array arrY.
 #pragma omp parallel reduction (+: y_amount)
-        {
-            y_amount += arrY[i];
-        }
+            {
+                y_amount += arrY[i];
+            }
 
-        // sum of arrX[i] * arrY[i].
+            // sum of arrX[i] * arrY[i].
 #pragma omp parallel reduction (+: xy_amount)
-        {
-            xy_amount += arrX[i] * arrY[i];
-        }
+            {
+                xy_amount += arrX[i] * arrY[i];
+            }
 
-        // sum of square of array elements.
+            // sum of square of array elements.
 #pragma omp parallel reduction (+: x_square_amount)
-        {
-            x_square_amount += arrX[i] * arrX[i];
-        }
+            {
+                x_square_amount += arrX[i] * arrX[i];
+            }
 #pragma omp parallel reduction (+: y_square_amount)
-        {
-            y_square_amount += arrY[i] * arrY[i];
+            {
+                y_square_amount += arrY[i] * arrY[i];
+            }
         }
+#pragma omp critical
+        result = (numberArray * xy_amount - x_amount * y_amount)
+                        / sqrt((numberArray * x_square_amount - x_amount * x_amount)
+                               * (numberArray * y_square_amount - y_amount * y_amount));
     }
-    double result = (numberArray * xy_amount - x_amount * y_amount)
-             / sqrt((numberArray * x_square_amount - x_amount * x_amount)
-                    * (numberArray * y_square_amount - y_amount * y_amount));
 
     return result;
 }
