@@ -36,19 +36,19 @@ int main() {
     }
     file.close();
 
-    auto begin = chrono::steady_clock::now();
+    auto p_begin = chrono::steady_clock::now();
     auto p_coefficient = parallel(numberArray, arrX, arrY);
-    auto end = chrono::steady_clock::now();
+    auto p_end = chrono::steady_clock::now();
     cout << "Correlation coefficient: " << p_coefficient << endl;
-    auto elapsed_ms = chrono::duration_cast<chrono::microseconds>(end - begin);
-    cout << "The parallel time: " << elapsed_ms.count() << " microseconds\n";
+    auto p_elapsed_ms = chrono::duration_cast<chrono::microseconds>(p_end - p_begin);
+    cout << "The parallel time: " << p_elapsed_ms.count() << " microseconds\n";
 
-    begin = chrono::steady_clock::now();
+    auto n_begin = chrono::steady_clock::now();
     auto n_coefficient = non_parallel(numberArray, arrX, arrY);
-    end = chrono::steady_clock::now();
+    auto n_end = chrono::steady_clock::now();
     cout << "Correlation coefficient: " << n_coefficient << endl;
-    elapsed_ms = chrono::duration_cast<chrono::microseconds>(end - begin);
-    cout << "The nonparallel time: " << elapsed_ms.count() << " microseconds\n\n";
+    auto n_elapsed_ms = chrono::duration_cast<chrono::microseconds>(n_end - n_begin);
+    cout << "The nonparallel time: " << n_elapsed_ms.count() << " microseconds\n\n";
 
     delete[] arrX;
     delete[] arrY;
@@ -74,36 +74,49 @@ double non_parallel(const int numberArray, const double *arrX, const double *arr
         y_square_amount += arrY[i] * arrY[i];
     }
 
-    return static_cast<double> (numberArray * xy_amount - x_amount * y_amount)
-           / sqrt((numberArray * x_square_amount - x_amount * x_amount)
-                  * (numberArray * y_square_amount - y_amount * y_amount));
+    double result = (numberArray * xy_amount - x_amount * y_amount)
+             / sqrt((numberArray * x_square_amount - x_amount * x_amount)
+                    * (numberArray * y_square_amount - y_amount * y_amount));
+
+    return result;
 }
 
 double parallel(const int numberArray, const double *arrX, const double *arrY) {
-    double result;
-#pragma omp parallel
-    {
-        double x_amount = 0, y_amount = 0, xy_amount = 0;
-        double x_square_amount = 0, y_square_amount = 0;
+    double x_amount = 0, y_amount = 0, xy_amount = 0;
+    double x_square_amount = 0, y_square_amount = 0;
 #pragma omp for
-        for (int i = 0; i < numberArray; i++) {
-            // sum of elements of array arrX.
+    for (int i = 0; i < numberArray; i++) {
+        // sum of elements of array arrX.
+#pragma omp parallel reduction (+: x_amount)
+        {
             x_amount += arrX[i];
+        }
 
-            // sum of elements of array arrY.
+        // sum of elements of array arrY.
+#pragma omp parallel reduction (+: y_amount)
+        {
             y_amount += arrY[i];
+        }
 
-            // sum of arrX[i] * arrY[i].
+        // sum of arrX[i] * arrY[i].
+#pragma omp parallel reduction (+: xy_amount)
+        {
             xy_amount += arrX[i] * arrY[i];
+        }
 
-            // sum of square of array elements.
+        // sum of square of array elements.
+#pragma omp parallel reduction (+: x_square_amount)
+        {
             x_square_amount += arrX[i] * arrX[i];
+        }
+#pragma omp parallel reduction (+: y_square_amount)
+        {
             y_square_amount += arrY[i] * arrY[i];
         }
-        result = (numberArray * xy_amount - x_amount * y_amount)
-                 / sqrt((numberArray * x_square_amount - x_amount * x_amount)
-                        * (numberArray * y_square_amount - y_amount * y_amount));
     }
+    double result = (numberArray * xy_amount - x_amount * y_amount)
+             / sqrt((numberArray * x_square_amount - x_amount * x_amount)
+                    * (numberArray * y_square_amount - y_amount * y_amount));
 
     return result;
 }
