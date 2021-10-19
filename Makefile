@@ -1,4 +1,4 @@
-all: generator cpp correlation result clean
+all: generator sequential parallel correlation result clean
 
 generator:
 	python3 generator.py
@@ -6,8 +6,11 @@ generator:
 correlation:
 	python3 correlation.py
 
-cpp:
-	g++ -std=c++11 main.cpp -o main.exe; ./main.exe > result.txt
+sequential:
+	g++ -std=c++11 sequential.cpp -o sequential.exe; ./sequential.exe > sequential.txt
+
+parallel:
+	g++ -std=c++11 parallel.cpp -o parallel.exe; ./parallel.exe > parallel.txt
 
 result:
 	python3 result.py

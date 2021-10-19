@@ -1,6 +1,0 @@
-Correlation coefficient: 0.000416568
-The parallel time: 41064 microseconds
-Correlation coefficient: 0.000416568
-The nonparallel time: 41132 microseconds
-
-The execution time of parallel calculations is 1.002 times less
