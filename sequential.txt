@@ -1,0 +1,2 @@
+Correlation coefficient: 0.000281944
+The sequential time: 178677 microseconds
