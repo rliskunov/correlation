@@ -12,6 +12,9 @@ sequential:
 parallel:
 	g++ -std=c++11 parallel.cpp -o parallel.exe; ./parallel.exe > parallel.txt
 
+mpi:
+	mpicc mpi.cpp -o mpi.exe; mpirun -np 2 ./mpi.exe; rm -rf mpi.exe
+
 result:
 	python3 result.py
 
