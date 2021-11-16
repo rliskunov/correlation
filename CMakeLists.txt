@@ -3,4 +3,4 @@ project(correlation)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(correlation parallel.cpp)
+add_executable(correlation mpi.cpp)
