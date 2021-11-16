@@ -11,18 +11,14 @@ def convert(time: int) -> int:
 
 
 if __name__ == '__main__':
-    parallel: int = round(
-        convert(get_time("parallel.txt")), 3
-    )
-    print(f"Parallel time: {parallel} seconds")
+    parallel: int = convert(get_time("parallel.txt"))
+    print(f"Parallel time: {round(parallel, 3)} seconds")
 
-    sequential: int = round(
-        convert(get_time("sequential.txt")), 3
-    )
-    print(f"Sequential time: {sequential} seconds")
+    sequential: int = convert(get_time("sequential.txt"))
+    print(f"Sequential time: {round(sequential, 3)} seconds")
 
     try:
-        result = {sequential / parallel}
+        result = round(sequential / parallel, 3)
         print(f"Sequential/Parallel: {result}")
     except ZeroDivisionError as err:
         print(f"ZeroDivisionError: {err}")
