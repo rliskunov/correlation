@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <time.h>
 #include "/usr/local/opt/libomp/include/omp.h"
 #include <sstream>
 #include <cmath>
@@ -34,12 +35,12 @@ int main() {
     }
     file.close();
 
-    auto begin = chrono::steady_clock::now();
+    clock_t begin = clock();
     auto coefficient = calculate(numberArray, arrX, arrY);
-    auto end = chrono::steady_clock::now();
+    clock_t end = clock();
     cout << "Correlation coefficient: " << coefficient << endl;
-    auto elapsed_ms = chrono::duration_cast<chrono::microseconds>(end - begin);
-    cout << "The parallel time: " << elapsed_ms.count() << " microseconds\n";
+    double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
+    cout << "The parallel time: " << time_spent << " seconds\n";
 
     delete[] arrX;
     delete[] arrY;
