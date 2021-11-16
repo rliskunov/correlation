@@ -20,3 +20,9 @@ if __name__ == '__main__':
         convert(get_time("sequential.txt")), 3
     )
     print(f"Sequential time: {sequential} seconds")
+
+    try:
+        result = {sequential / parallel}
+        print(f"Sequential/Parallel: {result}")
+    except ZeroDivisionError as err:
+        print(f"ZeroDivisionError: {err}")
