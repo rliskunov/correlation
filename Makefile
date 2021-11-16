@@ -19,4 +19,4 @@ result:
 	python3 result.py
 
 clean:
-	rm *.exe sample.txt
+	rm *.exe sample.txt parallel.txt sequential.txt
