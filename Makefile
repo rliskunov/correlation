@@ -10,7 +10,7 @@ sequential:
 	g++ -std=c++11 sequential.cpp -o sequential.exe; ./sequential.exe > sequential.txt
 
 parallel:
-	g++ -std=c++11 parallel.cpp -o parallel.exe; ./parallel.exe > parallel.txt
+	g++ -std=c++11 parallel.cpp -lgomp -o parallel.exe; ./parallel.exe > parallel.txt
 
 mpi:
 	mpicc mpi.cpp -o mpi.exe; mpirun -np 2 ./mpi.exe; rm -rf mpi.exe
