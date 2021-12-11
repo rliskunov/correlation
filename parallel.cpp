@@ -7,6 +7,8 @@
 
 int get_number_elements(const char *path);
 
+double omp_get_wtime(void);
+
 double calculate(int numberArray, const double *arrX, const double *arrY);
 
 using namespace std;
