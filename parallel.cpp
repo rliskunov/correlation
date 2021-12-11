@@ -36,12 +36,11 @@ int main() {
     }
     file.close();
 
-    clock_t begin = clock();
+    double start = omp_get_wtime();
     auto coefficient = calculate(numberArray, arrX, arrY);
-    clock_t end = clock();
+    double end = omp_get_wtime();
     cout << "Correlation coefficient: " << coefficient << endl;
-    double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
-    cout << "The parallel time: " << time_spent << " seconds\n";
+    cout << "The parallel time: " << end - start << " seconds\n";
 
     delete[] arrX;
     delete[] arrY;
