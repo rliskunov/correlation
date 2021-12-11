@@ -7,6 +7,7 @@ Coefficient of correlation of two samples (data is set in a text file)
 ### Requirements
 
 The app build and run requires:
+
 - python3.6+ (numpy)
 - g++ (std=c++11)
 - Linux or macOS
@@ -21,7 +22,7 @@ The app build and run requires:
 
 git clone https://github.com/rliskunov/correlation.git
 
-### Create a sample 
+### Create a sample
 
     $ make generator
 
@@ -40,6 +41,10 @@ git clone https://github.com/rliskunov/correlation.git
 ### Usage
 
     $ make
+
+### Usage on cluster
+
+    $ sbatch -w c4 runner.sh 
 
 ### Example of working
 
