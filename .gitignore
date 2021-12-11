@@ -2,6 +2,11 @@
 # Created by https://www.toptal.com/developers/gitignore/api/windows,linux,macos,python,pydev,pycharm+all,pycharm+iml,pycharm,jupyternotebooks,venv,git,gitbook,tortoisegit,visualstudio,visualstudiocode,netbeans,jetbrains,jetbrains+all,jetbrains+iml,microsoftoffice,c++,c,cmake
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,linux,macos,python,pydev,pycharm+all,pycharm+iml,pycharm,jupyternotebooks,venv,git,gitbook,tortoisegit,visualstudio,visualstudiocode,netbeans,jetbrains,jetbrains+all,jetbrains+iml,microsoftoffice,c++,c,cmake
 
+### Work ###
+sample.txt
+sequential.txt
+parallel.txt
+
 ### C ###
 # Prerequisites
 *.d
