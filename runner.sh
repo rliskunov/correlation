@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./parallel.exe > parallel.txt
+./parallel.exe
