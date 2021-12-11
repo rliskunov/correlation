@@ -10,7 +10,7 @@ double calculate(int numberArray, const double *arrX, const double *arrY);
 using namespace std;
 
 int main() {
-    auto path = R"(/Users/roman/CLionProjects/correlation/sample.txt)";
+    auto path = "sample.txt";
 //    auto path = R"(/home/RGLiskunov/correlation/sample.txt)";
 
     const auto numberArray = get_number_elements(path);
