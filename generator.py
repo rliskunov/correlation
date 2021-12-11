@@ -7,7 +7,7 @@ from numpy import array
 if __name__ == '__main__':
     min_number: int = 3
     max_number: int = 12
-    coefficient: int = 3_000_000
+    coefficient: int = 1_000_000
     size: int = randint(
         min_number * coefficient,
         max_number * coefficient

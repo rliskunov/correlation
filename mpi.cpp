@@ -1,8 +1,3 @@
-//
-// Created by Roman Liskunov on 06.11.2021.
-//
-
-
 #include <mpi.h>
 #include <stdio.h>
 
@@ -17,4 +12,5 @@ int main(int argc, char **argv) {
 
     printf("Hello: rank %d, world: %d\n",rank, world);
     MPI_Finalize();
+//    MPI_Wtime
 }
