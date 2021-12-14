@@ -9,13 +9,6 @@ int get_number_elements(const char *path);
 using namespace std;
 
 int main(int argc, char **argv) {
-    int rank, numprocs, elements_per_process, n_elements_recieved;
-
-    MPI_Status status;
-    MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
-
     auto path = "sample.txt";
 
     const auto numberArray = get_number_elements(path);
@@ -26,6 +19,13 @@ int main(int argc, char **argv) {
     double arrY[numberArray];
     double arrY_part1[numberArrayPart];
     double arrY_part2[numberArrayPart];
+
+    int rank, numprocs, elements_per_process, n_elements_recieved;
+
+    MPI_Status status;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
 
     ifstream file(path);
     if (!file.is_open()) {
