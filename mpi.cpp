@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
         if (arrY[i] < averageY) arrY_part1[i] = arrY[i];
         else arrY_part2[i] = arrY[i];
 
-//    wtime = MPI_Wtime();
+    wtime = MPI_Wtime();
 
     double partial_coefficient = 0;
     double x_amount = 0, y_amount = 0, xy_amount = 0;
@@ -104,11 +104,11 @@ int main(int argc, char **argv) {
     }
     double coefficient;
     MPI_Reduce(&partial_coefficient, &coefficient, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-//    wtime = MPI_Wtime() - wtime;
+    wtime = MPI_Wtime() - wtime;
 
     if (rank == 0) {
         cout << "Correlation coefficient: " << coefficient << endl;
-//        cout << "The parallel time: " << wtime << " seconds\n";
+        cout << "The parallel time: " << wtime << " seconds\n";
     }
 
     MPI_Finalize();
