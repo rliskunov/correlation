@@ -13,7 +13,7 @@ parallel:
 	g++ -std=c++11 parallel.cpp -lgomp -o parallel.exe; ./parallel.exe > parallel.txt
 
 mpi:
-	mpicxx -lm mpi.cpp -o mpi.exe; mpirun -np 2 ./mpi.exe
+	mpicxx  mpi.cpp -lm -o mpi.exe; mpirun -np 2 ./mpi.exe
 
 result:
 	python3 result.py
