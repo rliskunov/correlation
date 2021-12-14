@@ -12,13 +12,8 @@ int main(int argc, char **argv) {
     auto path = "sample.txt";
 
     const auto numberArray = get_number_elements(path);
-    const auto numberArrayPart = numberArray / 2;
     double arrX[numberArray];
-    double arrX_part1[numberArrayPart];
-    double arrX_part2[numberArrayPart];
     double arrY[numberArray];
-    double arrY_part1[numberArrayPart];
-    double arrY_part2[numberArrayPart];
 
     int rank, numprocs, elements_per_process, n_elements_recieved;
 
@@ -34,7 +29,7 @@ int main(int argc, char **argv) {
         string line;
         int count = 0;
         while (getline(file, line)) {
-            int x, y;
+            double x, y;
             istringstream iss(line);
             iss >> x >> y;
             arrX[count] = x;
@@ -44,67 +39,29 @@ int main(int argc, char **argv) {
     }
     file.close();
 
-    int amountX = 0;
-    for (int i = 0; i < numberArray; i++) amountX += arrX[i];
-    double averageX = amountX / numberArray;
-    for (int i = 0; i < numberArray; i++)
-        if (arrX[i] < averageX) arrX_part1[i] = arrX[i];
-        else arrX_part2[i] = arrX[i];
-
-    int amountY = 0;
-    for (int i = 0; i < numberArray; i++) amountY += arrY[i];
-    double averageY = amountY / numberArray;
-    for (int i = 0; i < numberArray; i++)
-        if (arrY[i] < averageY) arrY_part1[i] = arrY[i];
-        else arrY_part2[i] = arrY[i];
-
     double wtime = MPI_Wtime();
-
-    double partial_coefficient = 0;
     double x_amount = 0, y_amount = 0, xy_amount = 0;
     double x_square_amount = 0, y_square_amount = 0;
-    if (rank == 0) {
-        for (int i = 0; i < numberArrayPart; i++) {
-            // sum of elements of array arrX.
-            x_amount += arrX_part1[i];
 
-            // sum of elements of array arrY.
-            y_amount += arrY_part1[i];
+    for (int i = 0; i < numberArray; i++) {
+        // sum of elements of array arrX.
+        x_amount += arrX[i];
 
-            // sum of arrX[i] * arrY[i].
-            xy_amount += arrX_part1[i] * arrY_part1[i];
+        // sum of elements of array arrY.
+        y_amount += arrY[i];
 
-            // sum of square of array elements.
-            x_square_amount += arrX_part1[i] * arrX_part1[i];
-            y_square_amount += arrY_part1[i] * arrY_part1[i];
+        // sum of arrX[i] * arrY[i].
+        xy_amount += arrX[i] * arrY[i];
 
-            partial_coefficient += (numberArray * xy_amount - x_amount * y_amount)
-                                   / sqrt((numberArray * x_square_amount - x_amount * x_amount)
-                                          * (numberArray * y_square_amount - y_amount * y_amount));
-        }
-    } else if (rank == 1) {
-        for (int i = 0; i < numberArrayPart; i++) {
-            // sum of elements of array arrX.
-            x_amount += arrX_part2[i];
-
-            // sum of elements of array arrY.
-            y_amount += arrY_part2[i];
-
-            // sum of arrX[i] * arrY[i].
-            xy_amount += arrX_part2[i] * arrY_part2[i];
-
-            // sum of square of array elements.
-            x_square_amount += arrX_part2[i] * arrX_part2[i];
-            y_square_amount += arrY_part2[i] * arrY_part2[i];
-
-            partial_coefficient += (numberArray * xy_amount - x_amount * y_amount)
-                                   / sqrt((numberArray * x_square_amount - x_amount * x_amount)
-                                          * (numberArray * y_square_amount - y_amount * y_amount));
-        }
+        // sum of square of array elements.
+        x_square_amount += arrX[i] * arrX[i];
+        y_square_amount += arrY[i] * arrY[i];
     }
-    double coefficient;
-    MPI_Reduce(&partial_coefficient, &coefficient, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    wtime = MPI_Wtime() - wtime;
+    double result = (numberArray * xy_amount - x_amount * y_amount)
+                    / sqrt((numberArray * x_square_amount - x_amount * x_amount)
+                           * (numberArray * y_square_amount - y_amount * y_amount));
+
+    double wtime = MPI_Wtime() - wtime;
 
     if (rank == 0) {
         cout << "Correlation coefficient: " << coefficient << endl;
