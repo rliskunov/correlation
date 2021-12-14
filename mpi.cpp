@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
                     / sqrt((numberArray * x_square_amount - x_amount * x_amount)
                            * (numberArray * y_square_amount - y_amount * y_amount));
 
-    double wtime = MPI_Wtime() - wtime;
+    wtime = MPI_Wtime() - wtime;
 
     if (rank == 0) {
         cout << "Correlation coefficient: " << coefficient << endl;
