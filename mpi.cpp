@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
         x_square_amount += arrX[i] * arrX[i];
         y_square_amount += arrY[i] * arrY[i];
     }
-    double result = (numberArray * xy_amount - x_amount * y_amount)
+    double coefficient = (numberArray * xy_amount - x_amount * y_amount)
                     / sqrt((numberArray * x_square_amount - x_amount * x_amount)
                            * (numberArray * y_square_amount - y_amount * y_amount));
 

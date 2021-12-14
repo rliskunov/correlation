@@ -6,6 +6,7 @@
 sample.txt
 sequential.txt
 parallel.txt
+test*cpp
 
 ### C ###
 # Prerequisites
