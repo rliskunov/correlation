@@ -26,7 +26,7 @@ int main() {
         string line;
         int count = 0;
         while (getline(file, line)) {
-            int x, y;
+            double x, y;
             istringstream iss(line);
             iss >> x >> y;
             arrX[count] = x;
