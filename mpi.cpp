@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
         MPI_Bcast(arrX, numberArray, MPI_INT, 0, Comm);
         MPI_Bcast(arrY, numberArray, MPI_INT, 0, Comm);
 
-        calculate(
+        double coef = calculate(
                 1,
                 avg_rows_per_process,
                 numberArray,
@@ -66,8 +66,9 @@ int main(int argc, char **argv) {
                 arrY
         );
 
-
-//        ierr = MPI_Send(&res, 1, MPI_INT, root_process, 2002, MPI_COMM_WORLD);
+        for (int an_id = 1; an_id < numprocs; an_id++) {
+            ierr = MPI_Send(&coef, 1, MPI_INT, MPI_ANY_SOURCE, 2002, MPI_COMM_WORLD, status);
+        }
 
         delete[] arrX;
         delete[] arrY;
