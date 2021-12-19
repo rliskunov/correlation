@@ -4,46 +4,100 @@
 #include <sstream>
 #include <cmath>
 
-int get_number_elements(const char *path);
+int getNumberElements(const char *path);
+
+void getMask(int numberToMask, int numberArray, int *powerOfTwo);
+
+double calculate(int start_row, int end_row, const int numberArray, const double *arrX, const double *arrY);
 
 using namespace std;
 
 int main(int argc, char **argv) {
     auto path = "sample.txt";
 
-    const auto numberArray = get_number_elements(path);
-    double arrX[numberArray];
-    double arrY[numberArray];
+    int numberArray;
 
-    int rank, numprocs, elements_per_process, n_elements_recieved;
+    int *arrX;
+    int *arrY;
 
+    int rank, ierr, numprocs, an_id, avg_rows_per_process, start_row, end_row;
+
+    int root_process = 0;
+    MPI_Comm Comm = MPI_COMM_WORLD;
     MPI_Status status;
-    MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
+    ierr = MPI_Init(&argc, &argv);
+    ierr = MPI_Comm_rank(Comm, &rank);
+    ierr = MPI_Comm_size(Comm, &numprocs);
 
-    ifstream file(path);
-    if (!file.is_open()) {
-        cout << "Error reading!" << endl;
+    MPI_Barrier(Comm);
+    if (rank == root_process) {
+        numberArray = getNumberElements(path);
+        int variants = pow(2, numberArray);
+        arrX = new int[numberArray];
+        arrY = new int[numberArray];
+
+        ifstream file(path);
+        if (file.is_open()) {
+            string line;
+            int count = 0;
+            while (getline(file, line)) {
+                int x, y;
+                istringstream iss(line);
+                iss >> x >> y;
+                arrX[count] = x;
+                arrY[count] = y;
+                count++;
+            }
+        } else cout << "Error reading!" << endl;
+        file.close();
+
+        avg_rows_per_process = numberArray / numprocs;
+
+        MPI_Bcast(&avg_rows_per_process, 1, MPI_INT, 0, Comm);
+        MPI_Bcast(&numberArray, 1, MPI_INT, 0, Comm);
+        MPI_Bcast(arrX, numberArray, MPI_INT, 0, Comm);
+        MPI_Bcast(arrY, numberArray, MPI_INT, 0, Comm);
+
+        calculate(
+                1,
+                avg_rows_per_process,
+                numberArray,
+                arrX,
+                arrY
+        );
+
+        delete[] arrX;
+        delete[] arrY;
     } else {
-        string line;
-        int count = 0;
-        while (getline(file, line)) {
-            double x, y;
-            istringstream iss(line);
-            iss >> x >> y;
-            arrX[count] = x;
-            arrY[count] = y;
-            count++;
-        }
-    }
-    file.close();
+        MPI_Bcast(&avg_rows_per_process, 1, MPI_INT, 0, Comm);
+        MPI_Bcast(&numberArray, 1, MPI_INT, 0, Comm);
 
-    double wtime = MPI_Wtime();
+        arrX = new int[numberArray];
+        arrY = new int[numberArray];
+
+        MPI_Bcast(arrX, numberArray, MPI_INT, 0, Comm);
+        MPI_Bcast(arrY, numberArray, MPI_INT, 0, Comm);
+
+        start_row = avg_rows_per_process * rank;
+        end_row = avg_rows_per_process * (rank + 1);
+
+        calculate(
+                start_row,
+                end_row,
+                numberArray,
+                arrX,
+                arrY
+        );
+    }
+
+    ierr = MPI_Finalize();
+    return 0;
+}
+
+void calculate(int start_row, int end_row, const int numberArray, const double *arrX, const double *arrY) {
     double x_amount = 0, y_amount = 0, xy_amount = 0;
     double x_square_amount = 0, y_square_amount = 0;
-
-    for (int i = 0; i < numberArray; i++) {
+    for (int i = start_row; i < end_row + 1; i++) {
         // sum of elements of array arrX.
         x_amount += arrX[i];
 
@@ -57,30 +111,32 @@ int main(int argc, char **argv) {
         x_square_amount += arrX[i] * arrX[i];
         y_square_amount += arrY[i] * arrY[i];
     }
-    double coefficient = (numberArray * xy_amount - x_amount * y_amount)
+    double result = (numberArray * xy_amount - x_amount * y_amount)
                     / sqrt((numberArray * x_square_amount - x_amount * x_amount)
                            * (numberArray * y_square_amount - y_amount * y_amount));
-
-    wtime = MPI_Wtime() - wtime;
-
-    if (rank == 0) {
-        cout << "Correlation coefficient: " << coefficient << endl;
-        cout << "The parallel time: " << wtime << " seconds\n";
-    }
-
-    MPI_Finalize();
-    return 0;
+    cout << "Correlation coefficient: " << result << endl;
 }
 
-int get_number_elements(const char *path) {
+
+int getNumberElements(const char *path) {
     ifstream in(path);
     string str;
     auto temp = 0;
     if (in.is_open()) {
-        while (getline(in, str)) {
-            temp++;
-        }
+        while (getline(in, str)) temp++;
     } else cout << "Error reading" << endl;
     in.close();
     return temp;
+}
+
+void getMask(int numberToMask, int numberArray, int *powerOfTwo) {
+    cout << "Mask: ";
+    for (int j = 0; j < numberArray; j++) {
+        if ((numberToMask & powerOfTwo[j]) != 0) {
+            cout << "1";
+        } else {
+            cout << "0";
+        }
+    }
+    cout << "\n";
 }
