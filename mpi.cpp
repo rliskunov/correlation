@@ -8,7 +8,7 @@ int getNumberElements(const char *path);
 
 void getMask(int numberToMask, int numberArray, int *powerOfTwo);
 
-void calculate(int start_row, int end_row, const int numberArray, int *arrX, int *arrY);
+double calculate(int start_row, int end_row, const int numberArray, int *arrX, int *arrY);
 
 using namespace std;
 
@@ -66,6 +66,9 @@ int main(int argc, char **argv) {
                 arrY
         );
 
+
+//        ierr = MPI_Send(&res, 1, MPI_INT, root_process, 2002, MPI_COMM_WORLD);
+
         delete[] arrX;
         delete[] arrY;
     } else {
@@ -81,20 +84,23 @@ int main(int argc, char **argv) {
         start_row = avg_rows_per_process * rank;
         end_row = avg_rows_per_process * (rank + 1);
 
-        calculate(
+        double coef = calculate(
                 start_row,
                 end_row,
                 numberArray,
                 arrX,
                 arrY
         );
-    }
 
+        ierr = MPI_Send(&res, 1, MPI_INT, root_process, 2002, MPI_COMM_WORLD);
+
+        cout << "Correlation coefficient: " << coef << endl;
+    }
     ierr = MPI_Finalize();
     return 0;
 }
 
-void calculate(int start_row, int end_row, const int numberArray, int *arrX, int *arrY) {
+double calculate(int start_row, int end_row, const int numberArray, int *arrX, int *arrY) {
     double x_amount = 0, y_amount = 0, xy_amount = 0;
     double x_square_amount = 0, y_square_amount = 0;
     for (int i = start_row; i < end_row + 1; i++) {
@@ -114,7 +120,8 @@ void calculate(int start_row, int end_row, const int numberArray, int *arrX, int
     double result = (numberArray * xy_amount - x_amount * y_amount)
                     / sqrt((numberArray * x_square_amount - x_amount * x_amount)
                            * (numberArray * y_square_amount - y_amount * y_amount));
-    cout << "Correlation coefficient: " << result << endl;
+    return result;
+
 }
 
 
