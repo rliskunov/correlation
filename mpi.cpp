@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
                 arrY
         );
 
-        ierr = MPI_Send(&res, 1, MPI_INT, root_process, 2002, MPI_COMM_WORLD);
+        ierr = MPI_Send(&coef, 1, MPI_INT, root_process, 2002, MPI_COMM_WORLD);
 
         cout << "Correlation coefficient: " << coef << endl;
     }
