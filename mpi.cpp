@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
         );
 
         for (int an_id = 1; an_id < numprocs; an_id++) {
-            ierr = MPI_Send(&coef, 1, MPI_INT, MPI_ANY_SOURCE, 2002, MPI_COMM_WORLD, status);
+            ierr = MPI_Send(&coef, 1, MPI_INT, MPI_ANY_SOURCE, 2002, MPI_COMM_WORLD);
         }
 
         delete[] arrX;
