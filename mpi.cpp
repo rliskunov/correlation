@@ -8,7 +8,7 @@ int getNumberElements(const char *path);
 
 void getMask(int numberToMask, int numberArray, int *powerOfTwo);
 
-double calculate(int start_row, int end_row, const int numberArray, double *arrX, double *arrY);
+void calculate(int start_row, int end_row, const int numberArray, int *arrX, int *arrY);
 
 using namespace std;
 
@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void calculate(int start_row, int end_row, const int numberArray, double *arrX, double *arrY) {
+void calculate(int start_row, int end_row, const int numberArray, int *arrX, int *arrY) {
     double x_amount = 0, y_amount = 0, xy_amount = 0;
     double x_square_amount = 0, y_square_amount = 0;
     for (int i = start_row; i < end_row + 1; i++) {
