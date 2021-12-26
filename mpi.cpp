@@ -7,8 +7,7 @@
 #include <mpi.h>
 #include <time.h>
 
-int comm_sz;
-int rank;
+using namespace std;
 clock_t begin_init, begin_calc, end;
 double time_serial_from_init, time_serial_from_calc, time_parallel_from_init, time_parallel_from_calc;
 
@@ -39,7 +38,9 @@ int main(void) {
     file.close();
 
     MPI_Init(NULL, NULL);
+    int comm_sz;
     MPI_Comm_size(MPI_COMM_WORLD, &comm_sz);
+    int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     if (comm_sz > 1) {
