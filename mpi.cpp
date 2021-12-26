@@ -9,8 +9,8 @@
 
 using namespace std;
 
-int comm_sz;
-int rank;
+int world_size;
+int world_rank;
 clock_t begin_init, begin_calc, end_calc;
 double time_serial_from_init, time_serial_from_calc, time_parallel_from_init, time_parallel_from_calc;
 
@@ -43,10 +43,10 @@ int main(void) {
     file.close();
 
     MPI_Init(NULL, NULL);
-    MPI_Comm_size(MPI_COMM_WORLD, &comm_sz);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
-    if (comm_sz > 1) {
+    if (world_size > 1) {
         parallelPCC(numberArray, arrX, arrY);
     } else {
         cout << "\nERROR" << endl;
@@ -57,7 +57,7 @@ int main(void) {
 }
 
 void parallelPCC(const int numberArray, double *arrX, double *arrY) {
-    if (rank == 0) {
+    if (world_rank == 0) {
         begin_init = clock();
     }
 
@@ -72,12 +72,12 @@ void parallelPCC(const int numberArray, double *arrX, double *arrY) {
     double lastB = 0;
 
     int localSize = 0;
-    int remainder = numberArray % comm_sz;
+    int remainder = numberArray % world_size;
     if (remainder == 0) {
-        localSize = numberArray / comm_sz;
+        localSize = numberArray / world_size;
     } else {
-        localSize = numberArray / comm_sz;
-        if (rank < remainder) {
+        localSize = numberArray / world_size;
+        if (world_rank < remainder) {
             localSize++;
         }
     }
@@ -86,13 +86,13 @@ void parallelPCC(const int numberArray, double *arrX, double *arrY) {
     double *local_b = arrY;
 
     double offset = 0;
-    if (rank < remainder) {
-        offset = rank * localSize;
+    if (world_rank < remainder) {
+        offset = world_rank * localSize;
     } else {
-        offset = (rank * localSize) + remainder;
+        offset = (world_rank * localSize) + remainder;
     }
 
-    if (rank == comm_sz - 1) {
+    if (world_rank == world_size - 1) {
         lastB = local_b[localSize - 1];
         MPI_Send(&lastB, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
@@ -101,8 +101,8 @@ void parallelPCC(const int numberArray, double *arrX, double *arrY) {
 
     begin_calc = clock();
 
-    if (rank == 0) {
-        MPI_Recv(&lastB, 1, MPI_DOUBLE, comm_sz - 1, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    if (world_rank == 0) {
+        MPI_Recv(&lastB, 1, MPI_DOUBLE, world_size - 1, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         meanA = totalA / numberArray;
         totalB = totalA + lastB;
         meanB = totalB / numberArray;
@@ -136,11 +136,11 @@ void parallelPCC(const int numberArray, double *arrX, double *arrY) {
     free(b);
 
     double sdB = 0;
-    if (rank == 1) {
+    if (world_rank == 1) {
         sdB = sqrt(totalB2 / numberArray);
         MPI_Send(&sdB, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
-    if (rank == 0) {
+    if (world_rank == 0) {
         double sdA = sqrt(totalA2 / numberArray);
 
         MPI_Recv(&sdB, 1, MPI_DOUBLE, 1, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
