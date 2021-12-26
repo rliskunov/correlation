@@ -82,8 +82,8 @@ void parallelPCC(const int numberArray, double *arrX, double *arrY) {
         }
     }
 
-    double *local_a = malloc(localSize * sizeof(double));
-    double *local_b = malloc(localSize * sizeof(double));
+    double *local_a = new double[localSize];
+    double *local_b = new double[localSize];
 
     double offset = 0;
     if (world_rank < remainder) {
@@ -130,10 +130,10 @@ void parallelPCC(const int numberArray, double *arrX, double *arrY) {
     MPI_Reduce(&tempB, &totalB2, 1, MPI_DOUBLE, MPI_SUM, 1, MPI_COMM_WORLD);
     MPI_Reduce(&tempSum, &totalTempSum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
-    free(local_a);
-    free(local_b);
-    free(a);
-    free(b);
+    delete[] local_a;
+    delete[] local_b;
+    delete[] a;
+    delete[] b;
 
     double sdB = 0;
     if (world_rank == 1) {
