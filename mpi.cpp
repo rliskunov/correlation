@@ -8,8 +8,13 @@
 #include <time.h>
 
 using namespace std;
+
+int comm_sz;
+int rank;
 clock_t begin_init, begin_calc, end_calc;
 double time_serial_from_init, time_serial_from_calc, time_parallel_from_init, time_parallel_from_calc;
+
+int get_number_elements(const char *path);
 
 void parallelPCC(const int numberArray, double *arrX, double *arrY);
 
@@ -38,9 +43,7 @@ int main(void) {
     file.close();
 
     MPI_Init(NULL, NULL);
-    int comm_sz;
     MPI_Comm_size(MPI_COMM_WORLD, &comm_sz);
-    int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     if (comm_sz > 1) {
@@ -152,4 +155,17 @@ void parallelPCC(const int numberArray, double *arrX, double *arrY) {
         time_parallel_from_init = ((double) (end_calc - begin_init) / CLOCKS_PER_SEC) * 1000;
         cout << "\nTime Taken (Including Array Initialization):" << time_parallel_from_init << endl;
     }
+}
+
+int get_number_elements(const char *path) {
+    ifstream in(path);
+    string str;
+    auto temp = 0;
+    if (in.is_open()) {
+        while (getline(in, str)) {
+            temp++;
+        }
+    } else cout << "Error reading" << endl;
+    in.close();
+    return temp;
 }
