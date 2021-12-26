@@ -82,8 +82,8 @@ void parallelPCC(const int numberArray, double *arrX, double *arrY) {
         }
     }
 
-    double *local_a = arrX;
-    double *local_b = arrY;
+    double *local_a = malloc(localSize * sizeof(double));
+    double *local_b = malloc(localSize * sizeof(double));
 
     double offset = 0;
     if (world_rank < remainder) {
