@@ -1,176 +1,198 @@
+#include <mpi.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <string.h>
-#include <math.h>
-#include <stdlib.h>
-#include <mpi.h>
-#include <time.h>
+#include <cmath>
+
+#define send_data_tag 2001
+#define return_data_tag 2002
+
+int getNumberElements(const char *path);
+
+void getMask(int numberToMask, int numberArray, int *powerOfTwo);
 
 using namespace std;
 
-int world_size;
-int world_rank;
-clock_t begin_init, begin_calc, end_calc;
-double time_serial_from_init, time_serial_from_calc, time_parallel_from_init, time_parallel_from_calc;
-
-int get_number_elements(const char *path);
-
-void parallelPCC(const int numberArray, double *arrX, double *arrY);
-
-int main(void) {
+int main(int argc, char **argv) {
     auto path = "sample.txt";
 
-    const auto numberArray = get_number_elements(path);
-    auto *arrX = new double[numberArray];
-    auto *arrY = new double[numberArray];
+    int numberArray;
 
-    ifstream file(path);
-    if (!file.is_open()) {
-        cout << "Error reading!" << endl;
-    } else {
-        string line;
-        int count = 0;
-        while (getline(file, line)) {
-            double x, y;
-            istringstream iss(line);
-            iss >> x >> y;
-            arrX[count] = x;
-            arrY[count] = y;
-            count++;
+    int *arrX;
+    int *arrY;
+
+    int rank, ierr, numprocs, an_id, avg_rows_per_process, start_row, end_row;
+
+
+    double x_amount = 0, y_amount = 0, xy_amount = 0;
+    double x_square_amount = 0, y_square_amount = 0;
+
+    double total_x_amount = 0, total_y_amount = 0, total_xy_amount = 0;
+    double total_x_square_amount = 0, total_y_square_amount = 0;
+
+    int root_process = 0;
+    MPI_Comm Comm = MPI_COMM_WORLD;
+    MPI_Status status;
+    ierr = MPI_Init(&argc, &argv);
+    ierr = MPI_Comm_rank(Comm, &rank);
+    ierr = MPI_Comm_size(Comm, &numprocs);
+
+//    if (rank == 0) {
+//        int t;
+//        cout << "Please input number: ";
+//        cin >> t;
+//    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == root_process) {
+
+        numberArray = getNumberElements(path);
+        int variants = pow(2, numberArray);
+        int variants = pow(2, numberArray);
+        arrX = new int[numberArray];
+        arrY = new int[numberArray];
+
+        ifstream file(path);
+        if (file.is_open()) {
+            string line;
+            int count = 0;
+            while (getline(file, line)) {
+                int x, y;
+                istringstream iss(line);
+                iss >> x >> y;
+                arrX[count] = x;
+                arrY[count] = y;
+                count++;
+            }
+        } else cout << "Error reading!" << endl;
+        file.close();
+
+        avg_rows_per_process = numberArray / numprocs;
+
+        //Вычисляем и отправляем каждому процессу свой кусочек массива
+        for (int an_id = 1; an_id < numprocs; an_id++) {
+            start_row = an_id * avg_rows_per_process + 1;
+            end_row = (an_id + 1) * avg_rows_per_process;
+
+            if ((numberArray - end_row) < avg_rows_per_process)
+                end_row = numberArray - 1;
+
+            int num_rows_to_send = end_row - start_row + 1;
+
+            ierr = MPI_Send(&num_rows_to_send, 1, MPI_INT,
+                            an_id, send_data_tag, MPI_COMM_WORLD);
+
+            ierr = MPI_Send(&arrX[start_row], num_rows_to_send, MPI_INT,
+                            an_id, send_data_tag, MPI_COMM_WORLD);
+
+            ierr = MPI_Send(&arrY[start_row], num_rows_to_send, MPI_INT,
+                            an_id, send_data_tag, MPI_COMM_WORLD);
         }
-    }
-    file.close();
 
-    MPI_Init(NULL, NULL);
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+        for (int i = 0; i < avg_rows_per_process; i++) {
+            x_amount += arrX[i];
 
-    if (world_size > 1) {
-        parallelPCC(numberArray, arrX, arrY);
+            y_amount += arrY[i];
+
+            xy_amount += arrX[i] * arrY[i];
+
+            x_square_amount += arrX[i] * arrX[i];
+            y_square_amount += arrY[i] * arrY[i];
+        }
+
+        MPI_Reduce(&x_amount, &total_x_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce(&y_amount, &total_y_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce(&xy_amount, &total_xy_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce(&x_square_amount, &total_x_square_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce(&y_square_amount, &total_y_square_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+
+        double result = (numberArray * xy_amount - x_amount * y_amount)
+                        / sqrt((numberArray * x_square_amount - x_amount * x_amount)
+                               * (numberArray * y_square_amount - y_amount * y_amount));
+
+        cout << result;
+
+        delete[] arrX;
+        delete[] arrY;
     } else {
-        cout << "ERROR" << endl;
+        int numRowToRecieve;
+
+        ierr = MPI_Recv(&numRowToRecieve, 1, MPI_INT,
+                        root_process, send_data_tag, MPI_COMM_WORLD, &status);
+
+        int *arrX2 = new int[numRowToRecieve];
+        int *arrY2 = new int[numRowToRecieve];
+
+        ierr = MPI_Recv(&arrX2[0], numRowToRecieve, MPI_INT,
+                        root_process, send_data_tag, MPI_COMM_WORLD, &status);
+        ierr = MPI_Recv(&arrY2[0], numRowToRecieve, MPI_INT,
+                        root_process, send_data_tag, MPI_COMM_WORLD, &status);
+
+        for (int i = 0; i < numRowToRecieve; i++) {
+            x_amount += arrX2[i];
+
+            y_amount += arrY2[i];
+
+            xy_amount += arrX2[i] * arrY2[i];
+
+            x_square_amount += arrX2[i] * arrX2[i];
+            y_square_amount += arrY2[i] * arrY2[i];
+        }
+
+        MPI_Reduce(&x_amount, &total_x_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce(&y_amount, &total_y_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce(&xy_amount, &total_xy_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce(&x_square_amount, &total_x_square_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce(&y_square_amount, &total_y_square_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     }
 
-    MPI_Finalize();
+    ierr = MPI_Finalize();
     return 0;
 }
 
-void parallelPCC(const int numberArray, double *arrX, double *arrY) {
-    if (world_rank == 0) {
-        begin_init = clock();
-    }
+//double calculate(int start_row, int end_row, const int numberArray, const double* arrX, const double* arrY) {
+//	double x_amount = 0, y_amount = 0, xy_amount = 0;
+//	double x_square_amount = 0, y_square_amount = 0;
+//	for (int i = start_row; i < end_row + 1; i++) {
+//		for (int i = 0; i < numberArray; i++) { // вот ето лишнее
+//			// sum of elements of array arrX.
+//			x_amount += arrX[i];
+//
+//			// sum of elements of array arrY.
+//			y_amount += arrY[i];
+//
+//			// sum of arrX[i] * arrY[i].
+//			xy_amount += arrX[i] * arrY[i];
+//
+//			// sum of square of array elements.
+//			x_square_amount += arrX[i] * arrX[i];
+//			y_square_amount += arrY[i] * arrY[i];
+//		}
+//	}
+//	return result;
+//}
 
-    double *a = arrX;
-    double *b = arrY;
-    double tempSumA = 0;
-    double tempSumB = 0;
-    double totalA = 0;
-    double totalB = 0;
-    double meanA = 0;
-    double meanB = 0;
-    double lastB = 0;
 
-    int localSize = 0;
-    int remainder = numberArray % world_size;
-    if (remainder == 0) {
-        localSize = numberArray / world_size;
-    } else {
-        localSize = numberArray / world_size;
-        if (world_rank < remainder) {
-            localSize++;
-        }
-    }
-
-    double *local_a = new double[localSize];
-    double *local_b = new double[localSize];
-
-    double offset = 0;
-    if (world_rank < remainder) {
-        offset = world_rank * localSize;
-    } else {
-        offset = (world_rank * localSize) + remainder;
-    }
-
-    if (world_rank == world_size - 1) {
-        lastB = local_b[localSize - 1];
-        MPI_Send(&lastB, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
-    }
-
-    MPI_Reduce(&tempSumA, &totalA, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-
-    begin_calc = clock();
-
-    if (world_rank == 0) {
-        MPI_Recv(&lastB, 1, MPI_DOUBLE, world_size - 1, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        meanA = totalA / numberArray;
-        totalB = totalA + lastB;
-        meanB = totalB / numberArray;
-
-        cout << "Mean A: " << meanA << endl;
-        cout << "Mean B: " << meanB << endl;
-    }
-
-    MPI_Bcast(&meanA, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&meanB, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-    double tempA = 0;
-    double tempB = 0;
-    double tempSum = 0;
-    double totalA2 = 0;
-    double totalB2 = 0;
-    double totalTempSum = 0;
-
-    for (int j = 0; j < localSize; j++) {
-
-        tempA += (local_a[j] - meanA) * (local_a[j] - meanA);
-        tempB += (local_b[j] - meanB) * (local_b[j] - meanB);
-
-        tempSum += (local_a[j] - meanA) * (local_b[j] - meanB);
-    }
-
-    MPI_Reduce(&tempA, &totalA2, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Reduce(&tempB, &totalB2, 1, MPI_DOUBLE, MPI_SUM, 1, MPI_COMM_WORLD);
-    MPI_Reduce(&tempSum, &totalTempSum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-
-    delete[] local_a;
-    delete[] local_b;
-    delete[] a;
-    delete[] b;
-
-    double sdB = 0;
-    if (world_rank == 1) {
-        sdB = sqrt(totalB2 / numberArray);
-        MPI_Send(&sdB, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
-    }
-    if (world_rank == 0) {
-        double sdA = sqrt(totalA2 / numberArray);
-        cout << "Standard Deviation A: " << sdA << endl;
-
-        MPI_Recv(&sdB, 1, MPI_DOUBLE, 1, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        cout << "Standard Deviation B: " << sdA << endl;
-
-        totalTempSum = totalTempSum / numberArray;
-        double pcc = totalTempSum / (sdA * sdB);
-        cout << "Correlation Coefficient:" << pcc << endl;
-
-        end_calc = clock();
-        time_parallel_from_calc = ((double) (end_calc - begin_calc) / CLOCKS_PER_SEC) * 1000;
-        cout << "Time Taken (Calculation Only): " << time_parallel_from_calc << endl;
-        time_parallel_from_init = ((double) (end_calc - begin_init) / CLOCKS_PER_SEC) * 1000;
-        cout << "Time Taken (Including Array Initialization):" << time_parallel_from_init << endl;
-    }
-}
-
-int get_number_elements(const char *path) {
+int getNumberElements(const char *path) {
     ifstream in(path);
     string str;
     auto temp = 0;
     if (in.is_open()) {
-        while (getline(in, str)) {
-            temp++;
-        }
+        while (getline(in, str)) temp++;
     } else cout << "Error reading" << endl;
     in.close();
     return temp;
+}
+
+void getMask(int numberToMask, int numberArray, int *powerOfTwo) {
+    cout << "Mask: ";
+    for (int j = 0; j < numberArray; j++) {
+        if ((numberToMask & powerOfTwo[j]) != 0) {
+            cout << "1";
+        } else {
+            cout << "0";
+        }
+    }
+    cout << "\n";
 }
