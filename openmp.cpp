@@ -40,7 +40,7 @@ int main() {
     auto coefficient = calculate(numberArray, arrX, arrY);
     double end = omp_get_wtime();
     cout << "Correlation coefficient: " << coefficient << endl;
-    cout << "The parallel time: " << end - start << " seconds\n";
+    cout << "The openmp time: " << end - start << " seconds\n";
 
     delete[] arrX;
     delete[] arrY;

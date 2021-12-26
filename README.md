@@ -34,9 +34,13 @@ git clone https://github.com/rliskunov/correlation.git
 
     $ make sequential
 
-### Calculate parallel correlation (c++)
+### Calculate openmp correlation (c++)
 
-    $ make parallel
+    $ make openmp
+
+### Calculate mpi correlation (c++)
+
+    $ make mpi
 
 ### Usage
 
