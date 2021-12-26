@@ -100,6 +100,9 @@ int main(int argc, char **argv) {
 
         cout << "Correlation coefficient: " << result << endl;
 
+        double end_time = MPI_Wtime();
+        cout << "The mpi time: " << end_time - start_time << " seconds\n";
+
         delete[] arrX;
         delete[] arrY;
     } else {
@@ -132,8 +135,6 @@ int main(int argc, char **argv) {
     }
 
     MPI_Finalize();
-    double end_time = MPI_Wtime();
-    cout << "The mpi time: " << end_time - start_time << " seconds\n";
     return 0;
 }
 
