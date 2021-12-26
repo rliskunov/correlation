@@ -9,10 +9,6 @@
 
 using namespace std;
 
-
-auto path = "sample.txt";
-const auto numberArray = get_number_elements(path);
-
 int world_size;
 int world_rank;
 clock_t begin_init, begin_calc, end_calc;
@@ -23,6 +19,9 @@ int get_number_elements(const char *path);
 void parallelPCC(const int numberArray, double *arrX, double *arrY);
 
 int main(void) {
+    auto path = "sample.txt";
+
+    const auto numberArray = get_number_elements(path);
     auto *arrX = new double[numberArray];
     auto *arrY = new double[numberArray];
 
