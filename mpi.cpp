@@ -8,7 +8,7 @@
 #include <time.h>
 
 using namespace std;
-clock_t begin_init, begin_calc, end;
+clock_t begin_init, begin_calc, end_calc;
 double time_serial_from_init, time_serial_from_calc, time_parallel_from_init, time_parallel_from_calc;
 
 void parallelPCC(const int numberArray, const double *arrX, const double *arrY);
@@ -146,10 +146,10 @@ void parallelPCC(const int numberArray, const double *arrX, const double *arrY) 
         double pcc = totalTempSum / (sdA * sdB);
         cout << "\nPearson Correlation Coefficient:" << pcc << endl;
 
-        end = clock();
-        time_parallel_from_calc = ((double) (end - begin_calc) / CLOCKS_PER_SEC) * 1000;
+        end_calc = clock();
+        time_parallel_from_calc = ((double) (end_calc - begin_calc) / CLOCKS_PER_SEC) * 1000;
         cout << "\nTime Taken (Calculation Only) " << time_parallel_from_calc << endl;
-        time_parallel_from_init = ((double) (end - begin_init) / CLOCKS_PER_SEC) * 1000;
+        time_parallel_from_init = ((double) (end_calc - begin_init) / CLOCKS_PER_SEC) * 1000;
         cout << "\nTime Taken (Including Array Initialization):" << time_parallel_from_init << endl;
     }
 }
