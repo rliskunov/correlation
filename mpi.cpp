@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
                         / sqrt((numberArray * x_square_amount - x_amount * x_amount)
                                * (numberArray * y_square_amount - y_amount * y_amount));
 
-        cout << result;
+        cout << "Correlation Coefficient: " << result << endl;
 
         delete[] arrX;
         delete[] arrY;
