@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
     double total_x_amount = 0, total_y_amount = 0, total_xy_amount = 0;
     double total_x_square_amount = 0, total_y_square_amount = 0;
 
+    double begin_time = MPI_Wtime();
     int root_process = 0;
     MPI_Comm Comm = MPI_COMM_WORLD;
     MPI_Status status;
@@ -35,9 +36,7 @@ int main(int argc, char **argv) {
     int rank;
     MPI_Comm_rank(Comm, &rank);
     int num_procs;
-    MPI_Comm_size(Comm, &numprocs);
-
-    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Comm_size(Comm, &num_procs);
 
     if (rank == root_process) {
         numberArray = getNumberElements(path);
@@ -60,9 +59,9 @@ int main(int argc, char **argv) {
         } else cout << "Error reading!" << endl;
         file.close();
 
-        avg_rows_per_process = numberArray / numprocs;
+        avg_rows_per_process = numberArray / num_procs;
 
-        for (int an_id = 1; an_id < numprocs; an_id++) {
+        for (int an_id = 1; an_id < num_procs; an_id++) {
             start_row = an_id * avg_rows_per_process + 1;
             end_row = (an_id + 1) * avg_rows_per_process;
 
@@ -99,14 +98,14 @@ int main(int argc, char **argv) {
                         / sqrt((numberArray * total_x_square_amount - total_x_amount * total_x_amount)
                                * (numberArray * total_y_square_amount - total_y_amount * total_y_amount));
 
-        cout << "Correlation Coefficient: " << result << endl;
+        cout << "Correlation coefficient: " << result << endl;
 
         delete[] arrX;
         delete[] arrY;
     } else {
         int receive;
 
-        ierr = MPI_Recv(&receive, 1, MPI_INT, root_process, send_data_tag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&receive, 1, MPI_INT, root_process, send_data_tag, MPI_COMM_WORLD, &status);
 
         int *arrX2 = new int[receive];
         int *arrY2 = new int[receive];
@@ -132,10 +131,11 @@ int main(int argc, char **argv) {
         MPI_Reduce(&y_square_amount, &total_y_square_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     }
 
-    ierr = MPI_Finalize();
+    MPI_Finalize();
+    double end_time = MPI_Wtime();
+    cout << "The mpi time: " << end_time - start_time << " seconds\n";
     return 0;
 }
-
 
 int getNumberElements(const char *path) {
     ifstream in(path);
