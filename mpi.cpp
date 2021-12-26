@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     double total_x_amount = 0, total_y_amount = 0, total_xy_amount = 0;
     double total_x_square_amount = 0, total_y_square_amount = 0;
 
-    double begin_time = MPI_Wtime();
+    double start_time = MPI_Wtime();
     int root_process = 0;
     MPI_Comm Comm = MPI_COMM_WORLD;
     MPI_Status status;
