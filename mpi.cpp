@@ -49,7 +49,7 @@ int main(void) {
     if (world_size > 1) {
         parallelPCC(numberArray, arrX, arrY);
     } else {
-        cout << "\nERROR" << endl;
+        cout << "ERROR" << endl;
     }
 
     MPI_Finalize();
@@ -106,6 +106,9 @@ void parallelPCC(const int numberArray, double *arrX, double *arrY) {
         meanA = totalA / numberArray;
         totalB = totalA + lastB;
         meanB = totalB / numberArray;
+
+        cout << "Mean A" << meanA << endl;
+        cout << "Mean B" << meanB << endl;
     }
 
     MPI_Bcast(&meanA, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -142,18 +145,20 @@ void parallelPCC(const int numberArray, double *arrX, double *arrY) {
     }
     if (world_rank == 0) {
         double sdA = sqrt(totalA2 / numberArray);
+        cout << "Standard Deviation A" << sdA;
 
         MPI_Recv(&sdB, 1, MPI_DOUBLE, 1, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        cout << "Standard Deviation B" << sdA;
 
         totalTempSum = totalTempSum / numberArray;
         double pcc = totalTempSum / (sdA * sdB);
-        cout << "\nPearson Correlation Coefficient:" << pcc << endl;
+        cout << "Correlation Coefficient:" << pcc << endl;
 
         end_calc = clock();
         time_parallel_from_calc = ((double) (end_calc - begin_calc) / CLOCKS_PER_SEC) * 1000;
-        cout << "\nTime Taken (Calculation Only) " << time_parallel_from_calc << endl;
+        cout << "Time Taken (Calculation Only) " << time_parallel_from_calc << endl;
         time_parallel_from_init = ((double) (end_calc - begin_init) / CLOCKS_PER_SEC) * 1000;
-        cout << "\nTime Taken (Including Array Initialization):" << time_parallel_from_init << endl;
+        cout << "Time Taken (Including Array Initialization):" << time_parallel_from_init << endl;
     }
 }
 
