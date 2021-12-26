@@ -11,7 +11,7 @@ using namespace std;
 clock_t begin_init, begin_calc, end_calc;
 double time_serial_from_init, time_serial_from_calc, time_parallel_from_init, time_parallel_from_calc;
 
-void parallelPCC(const int numberArray, const double *arrX, const double *arrY);
+void parallelPCC(const int numberArray, double *arrX, double *arrY);
 
 int main(void) {
     auto path = "sample.txt";
@@ -53,7 +53,7 @@ int main(void) {
     return 0;
 }
 
-void parallelPCC(const int numberArray, const double *arrX, const double *arrY) {
+void parallelPCC(const int numberArray, double *arrX, double *arrY) {
     if (rank == 0) {
         begin_init = clock();
     }
