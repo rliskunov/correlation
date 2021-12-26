@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
 
         numberArray = getNumberElements(path);
         int variants = pow(2, numberArray);
-        int variants = pow(2, numberArray);
+//        int variants = pow(2, numberArray);
         arrX = new int[numberArray];
         arrY = new int[numberArray];
 
