@@ -17,12 +17,10 @@ int main(int argc, char **argv) {
     auto path = "sample.txt";
 
     int numberArray;
-
     int *arrX;
     int *arrY;
 
-    int rank, ierr, numprocs, an_id, avg_rows_per_process, start_row, end_row;
-
+    int an_id, avg_rows_per_process, start_row, end_row;
 
     double x_amount = 0, y_amount = 0, xy_amount = 0;
     double x_square_amount = 0, y_square_amount = 0;
@@ -33,20 +31,15 @@ int main(int argc, char **argv) {
     int root_process = 0;
     MPI_Comm Comm = MPI_COMM_WORLD;
     MPI_Status status;
-    ierr = MPI_Init(&argc, &argv);
-    ierr = MPI_Comm_rank(Comm, &rank);
-    ierr = MPI_Comm_size(Comm, &numprocs);
-
-//    if (rank == 0) {
-//        int t;
-//        cout << "Please input number: ";
-//        cin >> t;
-//    }
+    MPI_Init(&argc, &argv);
+    int rank;
+    MPI_Comm_rank(Comm, &rank);
+    int num_procs;
+    MPI_Comm_size(Comm, &numprocs);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (rank == root_process) {
-
         numberArray = getNumberElements(path);
         int variants = pow(2, numberArray);
         arrX = new int[numberArray];
@@ -69,7 +62,6 @@ int main(int argc, char **argv) {
 
         avg_rows_per_process = numberArray / numprocs;
 
-        //Вычисляем и отправляем каждому процессу свой кусочек массива
         for (int an_id = 1; an_id < numprocs; an_id++) {
             start_row = an_id * avg_rows_per_process + 1;
             end_row = (an_id + 1) * avg_rows_per_process;
@@ -79,11 +71,11 @@ int main(int argc, char **argv) {
 
             int num_rows_to_send = end_row - start_row + 1;
 
-            ierr = MPI_Send(&num_rows_to_send, 1, MPI_INT, an_id, send_data_tag, MPI_COMM_WORLD);
+            MPI_Send(&num_rows_to_send, 1, MPI_INT, an_id, send_data_tag, MPI_COMM_WORLD);
 
-            ierr = MPI_Send(&arrX[start_row], num_rows_to_send, MPI_INT, an_id, send_data_tag, MPI_COMM_WORLD);
+            MPI_Send(&arrX[start_row], num_rows_to_send, MPI_INT, an_id, send_data_tag, MPI_COMM_WORLD);
 
-            ierr = MPI_Send(&arrY[start_row], num_rows_to_send, MPI_INT, an_id, send_data_tag, MPI_COMM_WORLD);
+            MPI_Send(&arrY[start_row], num_rows_to_send, MPI_INT, an_id, send_data_tag, MPI_COMM_WORLD);
         }
 
         for (int i = 0; i < avg_rows_per_process; i++) {
@@ -112,20 +104,17 @@ int main(int argc, char **argv) {
         delete[] arrX;
         delete[] arrY;
     } else {
-        int numRowToRecieve;
+        int receive;
 
-        ierr = MPI_Recv(&numRowToRecieve, 1, MPI_INT,
-                        root_process, send_data_tag, MPI_COMM_WORLD, &status);
+        ierr = MPI_Recv(&receive, 1, MPI_INT, root_process, send_data_tag, MPI_COMM_WORLD, &status);
 
-        int *arrX2 = new int[numRowToRecieve];
-        int *arrY2 = new int[numRowToRecieve];
+        int *arrX2 = new int[receive];
+        int *arrY2 = new int[receive];
 
-        ierr = MPI_Recv(&arrX2[0], numRowToRecieve, MPI_INT,
-                        root_process, send_data_tag, MPI_COMM_WORLD, &status);
-        ierr = MPI_Recv(&arrY2[0], numRowToRecieve, MPI_INT,
-                        root_process, send_data_tag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&arrX2[0], receive, MPI_INT, root_process, send_data_tag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&arrY2[0], receive, MPI_INT, root_process, send_data_tag, MPI_COMM_WORLD, &status);
 
-        for (int i = 0; i < numRowToRecieve; i++) {
+        for (int i = 0; i < receive; i++) {
             x_amount += arrX2[i];
 
             y_amount += arrY2[i];
@@ -146,28 +135,6 @@ int main(int argc, char **argv) {
     ierr = MPI_Finalize();
     return 0;
 }
-
-//double calculate(int start_row, int end_row, const int numberArray, const double* arrX, const double* arrY) {
-//	double x_amount = 0, y_amount = 0, xy_amount = 0;
-//	double x_square_amount = 0, y_square_amount = 0;
-//	for (int i = start_row; i < end_row + 1; i++) {
-//		for (int i = 0; i < numberArray; i++) { // вот ето лишнее
-//			// sum of elements of array arrX.
-//			x_amount += arrX[i];
-//
-//			// sum of elements of array arrY.
-//			y_amount += arrY[i];
-//
-//			// sum of arrX[i] * arrY[i].
-//			xy_amount += arrX[i] * arrY[i];
-//
-//			// sum of square of array elements.
-//			x_square_amount += arrX[i] * arrX[i];
-//			y_square_amount += arrY[i] * arrY[i];
-//		}
-//	}
-//	return result;
-//}
 
 
 int getNumberElements(const char *path) {
