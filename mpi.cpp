@@ -49,7 +49,6 @@ int main(int argc, char **argv) {
 
         numberArray = getNumberElements(path);
         int variants = pow(2, numberArray);
-//        int variants = pow(2, numberArray);
         arrX = new int[numberArray];
         arrY = new int[numberArray];
 
@@ -80,14 +79,11 @@ int main(int argc, char **argv) {
 
             int num_rows_to_send = end_row - start_row + 1;
 
-            ierr = MPI_Send(&num_rows_to_send, 1, MPI_INT,
-                            an_id, send_data_tag, MPI_COMM_WORLD);
+            ierr = MPI_Send(&num_rows_to_send, 1, MPI_INT, an_id, send_data_tag, MPI_COMM_WORLD);
 
-            ierr = MPI_Send(&arrX[start_row], num_rows_to_send, MPI_INT,
-                            an_id, send_data_tag, MPI_COMM_WORLD);
+            ierr = MPI_Send(&arrX[start_row], num_rows_to_send, MPI_INT, an_id, send_data_tag, MPI_COMM_WORLD);
 
-            ierr = MPI_Send(&arrY[start_row], num_rows_to_send, MPI_INT,
-                            an_id, send_data_tag, MPI_COMM_WORLD);
+            ierr = MPI_Send(&arrY[start_row], num_rows_to_send, MPI_INT, an_id, send_data_tag, MPI_COMM_WORLD);
         }
 
         for (int i = 0; i < avg_rows_per_process; i++) {
@@ -107,9 +103,9 @@ int main(int argc, char **argv) {
         MPI_Reduce(&x_square_amount, &total_x_square_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
         MPI_Reduce(&y_square_amount, &total_y_square_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
-        double result = (numberArray * xy_amount - x_amount * y_amount)
-                        / sqrt((numberArray * x_square_amount - x_amount * x_amount)
-                               * (numberArray * y_square_amount - y_amount * y_amount));
+        double result = (numberArray * total_xy_amount - total_x_amount * total_y_amount)
+                        / sqrt((numberArray * total_x_square_amount - total_x_amount * total_x_amount)
+                               * (numberArray * total_y_square_amount - total_y_amount * total_y_amount));
 
         cout << "Correlation Coefficient: " << result << endl;
 
