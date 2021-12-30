@@ -9,16 +9,14 @@
 
 int getNumberElements(const char *path);
 
-void getMask(int numberToMask, int numberArray, int *powerOfTwo);
-
 using namespace std;
 
 int main(int argc, char **argv) {
     auto path = "sample.txt";
 
     int numberArray;
-    int *arrX;
-    int *arrY;
+    double *arrX;
+    double *arrY;
 
     int an_id, avg_rows_per_process, start_row, end_row;
 
@@ -41,8 +39,8 @@ int main(int argc, char **argv) {
     if (rank == root_process) {
         numberArray = getNumberElements(path);
         int variants = pow(2, numberArray);
-        arrX = new int[numberArray];
-        arrY = new int[numberArray];
+        arrX = new double[numberArray];
+        arrY = new double[numberArray];
 
         ifstream file(path);
         if (file.is_open()) {
@@ -110,8 +108,8 @@ int main(int argc, char **argv) {
 
         MPI_Recv(&receive, 1, MPI_INT, root_process, send_data_tag, MPI_COMM_WORLD, &status);
 
-        int *arrX2 = new int[receive];
-        int *arrY2 = new int[receive];
+        double *arrX2 = new double[receive];
+        double *arrY2 = new double[receive];
 
         MPI_Recv(&arrX2[0], receive, MPI_INT, root_process, send_data_tag, MPI_COMM_WORLD, &status);
         MPI_Recv(&arrY2[0], receive, MPI_INT, root_process, send_data_tag, MPI_COMM_WORLD, &status);
@@ -134,6 +132,9 @@ int main(int argc, char **argv) {
         MPI_Reduce(&y_square_amount, &total_y_square_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     }
 
+    delete[] arrX;
+    delete[] arrY;
+
     MPI_Finalize();
     return 0;
 }
@@ -147,16 +148,4 @@ int getNumberElements(const char *path) {
     } else cout << "Error reading" << endl;
     in.close();
     return temp;
-}
-
-void getMask(int numberToMask, int numberArray, int *powerOfTwo) {
-    cout << "Mask: ";
-    for (int j = 0; j < numberArray; j++) {
-        if ((numberToMask & powerOfTwo[j]) != 0) {
-            cout << "1";
-        } else {
-            cout << "0";
-        }
-    }
-    cout << "\n";
 }
