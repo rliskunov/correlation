@@ -130,6 +130,9 @@ int main(int argc, char **argv) {
         MPI_Reduce(&xy_amount, &total_xy_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
         MPI_Reduce(&x_square_amount, &total_x_square_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
         MPI_Reduce(&y_square_amount, &total_y_square_amount, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+
+        delete[] arrX2;
+        delete[] arrY2;
     }
 
     MPI_Finalize();
