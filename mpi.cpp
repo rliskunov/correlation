@@ -15,8 +15,8 @@ int main(int argc, char **argv) {
     auto path = "sample.txt";
 
     int numberArray;
-    int *arrX;
-    int *arrY;
+    double *arrX;
+    double *arrY;
 
     int an_id, avg_rows_per_process, start_row, end_row;
 
@@ -38,9 +38,9 @@ int main(int argc, char **argv) {
 
     if (rank == root_process) {
         numberArray = getNumberElements(path);
-        int variants = pow(2, numberArray);
-        arrX = new int[numberArray];
-        arrY = new int[numberArray];
+        double variants = pow(2, numberArray);
+        arrX = new double[numberArray];
+        arrY = new double[numberArray];
 
         ifstream file(path);
         if (file.is_open()) {
@@ -70,9 +70,9 @@ int main(int argc, char **argv) {
 
             MPI_Send(&num_rows_to_send, 1, MPI_INT, an_id, send_data_tag, MPI_COMM_WORLD);
 
-            MPI_Send(&arrX[start_row], num_rows_to_send, MPI_INT, an_id, send_data_tag, MPI_COMM_WORLD);
+            MPI_Send(&arrX[start_row], num_rows_to_send, MPI_DOUBLE, an_id, send_data_tag, MPI_COMM_WORLD);
 
-            MPI_Send(&arrY[start_row], num_rows_to_send, MPI_INT, an_id, send_data_tag, MPI_COMM_WORLD);
+            MPI_Send(&arrY[start_row], num_rows_to_send, MPI_DOUBLE, an_id, send_data_tag, MPI_COMM_WORLD);
         }
 
         for (int i = 0; i < avg_rows_per_process; i++) {
@@ -108,11 +108,11 @@ int main(int argc, char **argv) {
 
         MPI_Recv(&receive, 1, MPI_INT, root_process, send_data_tag, MPI_COMM_WORLD, &status);
 
-        int *arrX2 = new int[receive];
-        int *arrY2 = new int[receive];
+        double *arrX2 = new double[receive];
+        double *arrY2 = new double[receive];
 
-        MPI_Recv(&arrX2[0], receive, MPI_INT, root_process, send_data_tag, MPI_COMM_WORLD, &status);
-        MPI_Recv(&arrY2[0], receive, MPI_INT, root_process, send_data_tag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&arrX2[0], receive, MPI_DOUBLE, root_process, send_data_tag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&arrY2[0], receive, MPI_DOUBLE, root_process, send_data_tag, MPI_COMM_WORLD, &status);
 
         for (int i = 0; i < receive; i++) {
             x_amount += arrX2[i];
