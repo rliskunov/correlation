@@ -15,8 +15,8 @@ int main(int argc, char **argv) {
     auto path = "sample.txt";
 
     int numberArray;
-    double *arrX;
-    double *arrY;
+    int *arrX;
+    int *arrY;
 
     int an_id, avg_rows_per_process, start_row, end_row;
 
@@ -39,8 +39,8 @@ int main(int argc, char **argv) {
     if (rank == root_process) {
         numberArray = getNumberElements(path);
         int variants = pow(2, numberArray);
-        arrX = new double[numberArray];
-        arrY = new double[numberArray];
+        arrX = new int[numberArray];
+        arrY = new int[numberArray];
 
         ifstream file(path);
         if (file.is_open()) {
@@ -108,8 +108,8 @@ int main(int argc, char **argv) {
 
         MPI_Recv(&receive, 1, MPI_INT, root_process, send_data_tag, MPI_COMM_WORLD, &status);
 
-        double *arrX2 = new double[receive];
-        double *arrY2 = new double[receive];
+        int *arrX2 = new int[receive];
+        int *arrY2 = new int[receive];
 
         MPI_Recv(&arrX2[0], receive, MPI_INT, root_process, send_data_tag, MPI_COMM_WORLD, &status);
         MPI_Recv(&arrY2[0], receive, MPI_INT, root_process, send_data_tag, MPI_COMM_WORLD, &status);
